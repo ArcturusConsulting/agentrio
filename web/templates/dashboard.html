@@ -30,13 +30,13 @@
         }
         p.subtitle { 
             margin: 5px 0 0 0; 
-            color: #00E5FF; /* Cyan Accent text */
+            color: #00E5FF; 
             font-size: 14px; 
             font-weight: 500;
         }
         
         .card {
-            background: #111322; /* Slightly lighter deep layer for contrast */
+            background: #111322; 
             border: 1px solid #1E2238;
             border-radius: 8px;
             padding: 24px;
@@ -49,13 +49,12 @@
             margin-top: 0;
             margin-bottom: 24px;
             color: #FFFFFF;
-            border-left: 4px solid #FF7D00; /* Orange Accent */
+            border-left: 4px solid #FF7D00; 
             padding-left: 10px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
-        /* Form Styling */
         .form-group {
             margin-bottom: 18px;
         }
@@ -77,12 +76,12 @@
         }
         select:focus, input:focus, textarea:focus {
             outline: none;
-            border-color: #00E5FF; /* Cyan focus border */
+            border-color: #00E5FF; 
             box-shadow: 0 0 0 1px #00E5FF;
         }
         button {
-            background-color: #FF7D00; /* Orange CTA button */
-            color: #0A0B14; /* Deep text on bright button for readability */
+            background-color: #FF7D00; 
+            color: #0A0B14; 
             border: none;
             padding: 14px 20px;
             font-size: 14px;
@@ -98,7 +97,6 @@
             opacity: 0.9;
         }
         
-        /* Table Styling */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -107,7 +105,7 @@
         }
         th {
             background-color: #16192E;
-            color: #00E5FF; /* Cyan accent headers */
+            color: #00E5FF; 
             font-weight: 600;
             padding: 14px;
             border-bottom: 2px solid #2E3456;
@@ -122,7 +120,6 @@
             vertical-align: middle;
         }
         
-        /* Status Badges */
         .badge {
             display: inline-block;
             padding: 4px 8px;
@@ -177,8 +174,8 @@
             </div>
 
             <div class="form-group">
-                <label for="model">Specific Model String Identification</label>
-                <input type="text" name="model" id="model" placeholder="e.g., gpt-4o, claude-3-5-sonnet, gemini-1.5-pro">
+                <label for="model">Target Model Selection</label>
+                <select name="model" id="model"></select>
             </div>
 
             <div class="form-group">
@@ -238,6 +235,40 @@
         </table>
     </div>
 </div>
+
+<script>
+    const modelMatrix = {
+        openai: ['gpt-4o', 'gpt-4o-mini', 'o1-preview'],
+        anthropic: ['claude-3-5-sonnet', 'claude-3-haiku', 'claude-3-opus'],
+        google: ['gemini-1.5-pro', 'gemini-1.5-flash'],
+        groq: ['llama-3.1-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768']
+    };
+
+    const providerSelect = document.getElementById('provider');
+    const modelSelect = document.getElementById('model');
+
+    function updateModelDropdown() {
+        const selectedProvider = providerSelect.value;
+        const models = modelMatrix[selectedProvider] || [];
+        
+        // Clear previous options completely
+        modelSelect.innerHTML = '';
+        
+        // Dynamically build the option nodes
+        models.forEach(modelStr => {
+            const option = document.createElement('option');
+            option.value = modelStr;
+            option.textContent = modelStr;
+            modelSelect.appendChild(option);
+        });
+    }
+
+    // Attach immediate change listener to trigger layout reconfiguration
+    providerSelect.addEventListener('change', updateModelDropdown);
+
+    // Initial pass execution to set up default choices when page hits the browser DOM
+    document.addEventListener('DOMContentLoaded', updateModelDropdown);
+</script>
 
 </body>
 </html>
