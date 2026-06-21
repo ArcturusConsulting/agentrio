@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Databases
+*.sqlite3
+*.db
+
+# AgenTrio Local Outputs & Logs
+outputs/
+*.log
+
+# IDE and System Files
+.vscode/
+.idea/
+.DS_Store
