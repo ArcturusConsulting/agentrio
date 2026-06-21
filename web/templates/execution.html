@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Step 3: Executing Engine Graph // AgenTrio{% endblock %}
+
+{% block content %}
+<header style="margin-bottom: 30px;">
+    <h1>Step 3: Real-Time Execution Log</h1>
+    <p style="color: #00E5FF; margin: 5px 0 0 0; font-size: 14px;">
+        Task ID: <strong style="color: #FF7D00;">#{{ task.id }}</strong> // Mode: <code>{{ task.mode }}</code>
+    </p>
+</header>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="card-title" style="margin-bottom: 0;">Multi-Agent Telemetry Stream</h2>
+        <div>
+            Status: <span id="status-badge" style="font-family: monospace; padding: 4px 10px; border-radius: 4px; background: #16192E; border: 1px solid #00E5FF; color: #00E5FF;">{{ task.status }}</span>
+        </div>
+    </div>
+
+    <pre id="log-terminal" style="background-color: #05060B; border: 1px solid #1E2238; border-radius: 6px; padding: 20px; font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #00FF66; height: 400px; overflow-y: scroll; margin: 0; line-height: 1.5;">[SYSTEM INITIATED] Connecting to local SQLite runtime channel...
+Fetching execution graph state history...
+{% if task.logs %}{{ task.logs }}{% else %}[WAITING] Awaiting orchestration frame logs...{% endif %}</pre>
+</div>
+
+<div style="display: flex; justify-content: flex-end; gap: 15px;">
+    <a href="{% url 'dashboard' %}" style="background-color: #1E293B; color: #FFFFFF; text-decoration: none; padding: 14px 20px; font-size: 14px; font-weight: 700; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Go to Dashboard</a>
+</div>
+
+<script>
+    // Simple, lightweight polling loop to tail logs without a JavaScript framework
+    const taskId = "{{ task.id }}";
+    const terminal = document.getElementById('log-terminal');
+    const badge = document.getElementById('status-badge');
+
+    function pollExecutionState() {
+        // We poll a lightweight JSON endpoint for status updates
+        fetch(`/execution/${taskId}/status/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.logs) {
+                    terminal.textContent = data.logs;
+                    terminal.scrollTop = terminal.scrollHeight; // Auto-scroll terminal
+                }
+                badge.textContent = data.status;
+                
+                // Colorize or alert based on operational status
+                if (data.status === 'SUCCESS') {
+                    badge.style.borderColor = '#10B981';
+                    badge.style.color = '#10B981';
+                } else if (data.status === 'FAILED') {
+                    badge.style.borderColor = '#EF4444';
+                    badge.style.color = '#EF4444';
+                } else {
+                    // Keep polling if still running or pending
+                    setTimeout(pollExecutionState, 2000);
+                }
+            });
+    }
+
+    // Auto-scroll terminal window on initial load
+    terminal.scrollTop = terminal.scrollHeight;
+    
+    // Kickstart polling loop if task isn't finalized
+    if ("{{ task.status }}" === "PENDING" || "{{ task.status }}" === "RUNNING") {
+        setTimeout(pollExecutionState, 1000);
+    }
+</script>
+{% endblock %}

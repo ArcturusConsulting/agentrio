@@ -1,274 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgenTrio Operational Dashboard</title>
-    <style>
-        * { box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #0A0B14;
-            color: #FFFFFF;
-            margin: 0;
-            padding: 40px 20px;
-        }
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-        header {
-            margin-bottom: 30px;
-            border-bottom: 2px solid #1E293B;
-            padding-bottom: 20px;
-        }
-        h1 { 
-            margin: 0; 
-            font-size: 26px; 
-            color: #FFFFFF; 
-            letter-spacing: -0.5px;
-        }
-        p.subtitle { 
-            margin: 5px 0 0 0; 
-            color: #00E5FF; 
-            font-size: 14px; 
-            font-weight: 500;
-        }
-        
-        .card {
-            background: #111322; 
-            border: 1px solid #1E2238;
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-            margin-bottom: 30px;
-        }
-        .card-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-top: 0;
-            margin-bottom: 24px;
-            color: #FFFFFF;
-            border-left: 4px solid #FF7D00; 
-            padding-left: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .form-group {
-            margin-bottom: 18px;
-        }
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #94A3B8;
-        }
-        select, input[type="text"], textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #2E3456;
-            border-radius: 6px;
-            font-size: 14px;
-            background-color: #0A0B14;
-            color: #FFFFFF;
-        }
-        select:focus, input:focus, textarea:focus {
-            outline: none;
-            border-color: #00E5FF; 
-            box-shadow: 0 0 0 1px #00E5FF;
-        }
-        button {
-            background-color: #FF7D00; 
-            color: #0A0B14; 
-            border: none;
-            padding: 14px 20px;
-            font-size: 14px;
-            font-weight: 700;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: opacity 0.2s;
-        }
-        button:hover { 
-            opacity: 0.9;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 14px;
-        }
-        th {
-            background-color: #16192E;
-            color: #00E5FF; 
-            font-weight: 600;
-            padding: 14px;
-            border-bottom: 2px solid #2E3456;
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 0.5px;
-        }
-        td {
-            padding: 14px;
-            border-bottom: 1px solid #1E2238;
-            color: #E2E8F0;
-            vertical-align: middle;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            font-size: 11px;
-            font-weight: 700;
-            border-radius: 4px;
-            text-transform: uppercase;
-        }
-        .badge-pending { background-color: #2A241F; color: #FF7D00; border: 1px solid #FF7D00; }
-        .badge-running { background-color: #142834; color: #00E5FF; border: 1px solid #00E5FF; }
-        .badge-success { background-color: #132D24; color: #10B981; border: 1px solid #10B981; }
-        .badge-failed { background-color: #31181E; color: #EF4444; border: 1px solid #EF4444; }
+{% extends 'base.html' %}
 
-        a.artifact-link {
-            color: #00E5FF;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        a.artifact-link:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
+{% block title %}Task Control Center // AgenTrio{% endblock %}
 
-<div class="container">
-    <header>
-        <h1>AgenTrio Operational Control Center</h1>
-        <p class="subtitle">Multi-Agent Engine Monitoring & Job Dispatcher Layer // Arcturus Consulting</p>
-    </header>
+{% block content %}
+<header style="margin-bottom: 30px;">
+    <h1>Task Control Center</h1>
+    <p style="color: #00E5FF; margin: 5px 0 0 0; font-size: 14px;">Review and manipulate historical execution runs</p>
+</header>
 
-    <div class="card">
-        <h2 class="card-title">Dispatch New Agent Task Matrix</h2>
-        <form method="POST" action="{% url 'dispatch_task' %}">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="mode">Operational Orchestrator (Anti-Corruption Layer Engine Mode)</label>
-                <select name="mode" id="mode">
-                    <option value="ACL">ACL Generator</option>
-                    <option value="CURATOR">ArtiCurator</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="provider">Target LLM Provider Core</label>
-                <select name="provider" id="provider">
-                    <option value="openai">OpenAI Infrastructure (GPT)</option>
-                    <option value="anthropic">Anthropic Infrastructure (Claude)</option>
-                    <option value="google">Google Cloud Engine (Gemini)</option>
-                    <option value="groq">Groq Ultra-Low Latency Engine (Llama)</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="model">Target Model Selection</label>
-                <select name="model" id="model"></select>
-            </div>
-
-            <div class="form-group">
-                <label for="prompt_input">Dynamic Execution Directives (Context Data)</label>
-                <textarea name="prompt_input" id="prompt_input" rows="4" placeholder="Enter instructions, requirements, or data inputs for the execution loop..."></textarea>
-            </div>
-
-            <button type="submit">Initialize Orchestration Execution Graph</button>
-        </form>
-    </div>
-
-    <div class="card">
-        <h2 class="card-title">Live Execution Monitoring Matrix</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Task ID</th>
-                    <th>Engine Mode</th>
-                    <th>Target Model</th>
-                    <th>Execution Status</th>
-                    <th>Timestamp (Created)</th>
-                    <th>Output Artifact</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for task in tasks %}
-                <tr>
-                    <td><strong>#{{ task.id }}</strong></td>
-                    <td><code style="color: #FF7D00;">{{ task.get_mode_display }}</code></td>
-                    <td><span style="font-family: monospace; background: #16192E; color: #FFFFFF; padding: 4px 8px; border-radius:4px; border: 1px solid #2E3456;">{{ task.config_data.model|default:"Default LLM" }}</span></td>
-                    <td>
-                        {% if task.status == 'PENDING' %}
-                            <span class="badge badge-pending">Pending</span>
-                        {% elif task.status == 'RUNNING' %}
-                            <span class="badge badge-running">Running</span>
-                        {% elif task.status == 'SUCCESS' %}
-                            <span class="badge badge-success">Success</span>
-                        {% else %}
-                            <span class="badge badge-failed">Failed</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ task.created_at|date:"Y-m-d H:i:s" }}</td>
-                    <td>
-                        {% if task.output_file_path %}
-                            <a href="#" class="artifact-link">View Generated Artifact</a>
-                        {% else %}
-                            <span style="color: #64748B; font-style: italic;">Processing...</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" style="text-align: center; color: #64748B; padding: 40px 0;">No orchestration tasks dispatched in local SQLite state context yet.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="card">
+    <h2 class="card-title">Historical Execution Matrix</h2>
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+        <thead>
+            <tr style="background-color: #16192E; color: #00E5FF; font-size: 12px; text-transform: uppercase;">
+                <th style="padding: 14px;">Task ID</th>
+                <th>Engine Mode</th>
+                <th>Workflow Status</th>
+                <th>Timestamp</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr style="border-bottom: 1px solid #1E2238;">
+                <td style="padding: 14px;"><strong>#{{ task.id }}</strong></td>
+                <td><code style="color: #FF7D00;">{{ task.mode }}</code></td>
+                <td>
+                    <span style="font-family: monospace; background: #16192E; padding: 4px 8px; border-radius:4px;">
+                        {{ task.status }}
+                    </span>
+                </td>
+                <td>{{ task.created_at|date:"Y-m-d H:i:s" }}</td>
+                <td style="text-align: right;">
+                    <a href="{% url 'edit_config' task.id %}" style="color: #00E5FF; text-decoration: none; margin-right: 10px;">Edit</a>
+                    <a href="{% url 'rerun_task' task.id %}" style="color: #10B981; text-decoration: none; margin-right: 10px;">Rerun</a>
+                    <a href="{% url 'duplicate_task' task.id %}" style="color: #E2E8F0; text-decoration: none; margin-right: 10px;">Duplicate</a>
+                    <a href="{% url 'delete_task' task.id %}" style="color: #EF4444; text-decoration: none;" onclick="return confirm('Delete task execution state?')">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: #64748B; padding: 40px 0;">No past tasks found in SQLite state database.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
-
-<script>
-    const modelMatrix = {
-        openai: ['gpt-4o', 'gpt-4o-mini', 'o1-preview'],
-        anthropic: ['claude-3-5-sonnet', 'claude-3-haiku', 'claude-3-opus'],
-        google: ['gemini-1.5-pro', 'gemini-1.5-flash'],
-        groq: ['llama-3.1-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768']
-    };
-
-    const providerSelect = document.getElementById('provider');
-    const modelSelect = document.getElementById('model');
-
-    function updateModelDropdown() {
-        const selectedProvider = providerSelect.value;
-        const models = modelMatrix[selectedProvider] || [];
-        
-        // Clear previous options completely
-        modelSelect.innerHTML = '';
-        
-        // Dynamically build the option nodes
-        models.forEach(modelStr => {
-            const option = document.createElement('option');
-            option.value = modelStr;
-            option.textContent = modelStr;
-            modelSelect.appendChild(option);
-        });
-    }
-
-    // Attach immediate change listener to trigger layout reconfiguration
-    providerSelect.addEventListener('change', updateModelDropdown);
-
-    // Initial pass execution to set up default choices when page hits the browser DOM
-    document.addEventListener('DOMContentLoaded', updateModelDropdown);
-</script>
-
-</body>
-</html>
+{% endblock %}

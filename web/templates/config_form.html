@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Step 2: Configure Task // AgenTrio{% endblock %}
+
+{% block content %}
+<header style="margin-bottom: 30px;">
+    <h1>Step 2: Configuration Form</h1>
+    <p style="color: #00E5FF; margin: 5px 0 0 0; font-size: 14px;">
+        Active Mode: <strong style="color: #FF7D00;">{{ mode }}</strong>
+    </p>
+</header>
+
+<form method="POST" action="{% url 'config_form' %}?mode={{ mode }}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="mode" value="{{ mode }}">
+
+    <div class="card">
+        <h2 class="card-title">1. Execution Inputs</h2>
+        
+        {% if mode == 'ACL' %}
+            <div class="form-group">
+                <label for="raw_csv">Upload Physical Source Data (.csv)</label>
+                <input type="file" name="raw_csv" id="raw_csv" required accept=".csv">
+            </div>
+            <div class="form-group">
+                <label for="target_schema">Target Database Schema Layout</label>
+                <textarea name="target_schema" id="target_schema" rows="3" placeholder="Define the structured columns you need to map into..."></textarea>
+            </div>
+        {% else %}
+            <div class="form-group">
+                <label for="topic_brief">Topic Brief / Keywords</label>
+                <textarea name="topic_brief" id="topic_brief" rows="3" placeholder="Enter topic configuration instructions, raw concepts, or content keywords..."></textarea>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">2. Dynamic Prompt Manager (Agent Personas)</h2>
+        <p style="color: #64748B; font-size: 13px; margin-top: -15px; margin-bottom: 20px;">
+            Review or modify the behavior constraints directly inside the active template context.
+        </p>
+
+        {% if mode == 'ACL' %}
+            <div class="form-group">
+                <label>Agent 1: Analyst Persona (Strategic Mapping Layer)</label>
+                <textarea name="prompt_agent_1" rows="3">You are the Strategic Mapping Layer...</textarea>
+            </div>
+            <div class="form-group">
+                <label>Agent 2: Coder Persona (Deterministic Execution Layer)</label>
+                <textarea name="prompt_agent_2" rows="3">You are a Deterministic Execution Node...</textarea>
+            </div>
+            <div class="form-group">
+                <label>Agent 3: Tester Persona (Automated Quality Gate)</label>
+                <textarea name="prompt_agent_3" rows="3">You are an Automated Quality Gate...</textarea>
+            </div>
+        {% else %}
+            <div class="form-group">
+                <label>Agent 1: Web Snatcher Persona (Scraping Node)</label>
+                <textarea name="prompt_agent_1" rows="3">You are an automated web scraping node...</textarea>
+            </div>
+            <div class="form-group">
+                <label>Agent 2: Contextual Writer Persona (Synthesis Layer)</label>
+                <textarea name="prompt_agent_2" rows="3">You are a synthesis writing node...</textarea>
+            </div>
+            <div class="form-group">
+                <label>Agent 3: Editorial Review Persona (Stylistic Gatekeeper)</label>
+                <textarea name="prompt_agent_3" rows="3">You are a final stylistic editor...</textarea>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">3. Advanced Agent Routing (LLM Matrix)</h2>
+        
+        <div class="form-group">
+            <label for="model_agent_1">Agent 1 Model Engine Mapping</label>
+            <select name="model_agent_1" id="model_agent_1">
+                <option value="gemini-1.5-pro">Google - gemini-1.5-pro</option>
+                <option value="claude-3-5-sonnet">Anthropic - claude-3-5-sonnet</option>
+                <option value="gpt-4o-mini">OpenAI - gpt-4o-mini</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="model_agent_2">Agent 2 Model Engine Mapping</label>
+            <select name="model_agent_2" id="model_agent_2">
+                <option value="claude-3-5-sonnet" selected>Anthropic - claude-3-5-sonnet</option>
+                <option value="gemini-1.5-pro">Google - gemini-1.5-pro</option>
+                <option value="gpt-4o-mini">OpenAI - gpt-4o-mini</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="model_agent_3">Agent 3 Model Engine Mapping</label>
+            <select name="model_agent_3" id="model_agent_3">
+                <option value="gpt-4o-mini" selected>OpenAI - gpt-4o-mini</option>
+                <option value="gemini-1.5-pro">Google - gemini-1.5-pro</option>
+                <option value="claude-3-5-sonnet">Anthropic - claude-3-5-sonnet</option>
+            </select>
+        </div>
+
+        <button type="submit" style="margin-top: 15px;">Launch Execution Graph</button>
+    </div>
+</form>
+{% endblock %}
