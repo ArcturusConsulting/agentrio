@@ -17,6 +17,8 @@ venv.bak/
 *.db
 
 # AgenTrio Local Outputs & Logs
+artifacts/
+raw_uploads/
 outputs/
 *.log
 

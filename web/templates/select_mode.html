@@ -1,22 +1,98 @@
 {% extends 'base.html' %}
 
+{% block title %}Step 1: Select Processing Engine Mode // AgenTrio{% endblock %}
+
 {% block content %}
-<header style="margin-bottom: 30px;">
-    <h1>Step 1: Select Processing Engine Mode</h1>
-    <p style="color: #64748B; margin: 5px 0 0 0; font-size: 14px;">Decouple the pipeline loop layout early</p>
+<!-- Platform Overview Section -->
+<div style="max-width: 800px; margin: 0 auto 30px auto; border-left: 4px solid #FF7D00; padding-left: 20px;">
+    <h1 style="color: #ffffff; font-size: 32px; margin: 0 0 12px 0; font-weight: 700;">What is AgenTrio?</h1>
+    <p style="color: #E2E8F0; line-height: 1.6; margin: 0; font-size: 16px;">
+        AgenTrio is a next-generation multi-agent coordination system driven by three specialized LLM engine nodes: 
+        <strong>Analisa</strong>, <strong>Writus</strong>, and <strong>Checky</strong>. Rather than executing flat prompts, 
+        these agents operate as a collaborative graph network—passing structured memory payloads down the line to solve 
+        complex, multi-step execution processes autonomously.
+    </p>
+</div>
+
+<!-- Relocated Page Header (Completely outside and below the first card) -->
+<header style="max-width: 800px; margin: 0 auto 30px auto; text-align: left;">
+    <h1 style="font-size: 24px; margin: 0; color: #FFFFFF;">Step 1: Select Processing Engine Mode</h1>
+    <p style="color: #00E5FF; margin: 5px 0 0 0; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase;">
+        Orchestrate multi-agent task structures at runtime
+    </p>
 </header>
 
-<div class="card" style="max-width: 600px; margin: 0 auto;">
+<!-- Mode Selection Card -->
+<div class="card" style="max-width: 800px; margin: 0 auto;">
     <h2 class="card-title">Choose Execution Target</h2>
     <form method="GET" action="{% url 'config_form' %}">
         <div class="form-group">
             <label for="mode">Available Multi-Agent Architectures</label>
-            <select name="mode" id="mode">
-                <option value="ACL">Tri-Agent ACL Generator (Analyst -> Coder -> Tester)</option>
-                <option value="CURATOR">Tri-Agent ArtiCurator (Snatcher -> Writer -> Editor)</option>
+            <select name="mode" id="mode" onchange="updateDynamicExplanation()" style="width: 100%; padding: 12px; background: #0A0D1A; border: 1px solid #1E2238; color: #FFFFFF; border-radius: 6px; font-size: 14px;">
+                <option value="ARTICURATOR">ArtiCurator Engine (Snatch → Write → Edit)</option>
+                <option value="ACLGENERATOR">ACL Generator Engine (Analyze → Code → Test)</option>
             </select>
         </div>
-        <button type="submit">Proceed to Configuration</button>
+
+        <div id="explanation-box" style="background: #060814; border: 1px solid #1E2238; border-radius: 6px; padding: 20px; margin: 25px 0; font-size: 14px; line-height: 1.6;">
+            <h3 style="margin-top: 0; color: #00E5FF; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px;">
+                Current Graph Topology: <span id="topology-title">ArtiCurator</span>
+            </h3>
+            <p id="topology-desc" style="color: #94A3B8; margin-bottom: 15px;">
+                Optimized for content localization, high-end whitepapers, and strategic marketing material synthesis.
+            </p>
+            
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="margin-bottom: 10px;">
+                    <strong style="color: #FF7D00;">1. Analisa (The Discovery Node):</strong> 
+                    <span id="agent-1-desc">Scans context matrix schemas, extracts live trends, and builds a comprehensive research brief.</span>
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <strong style="color: #FF7D00;">2. Writus (The Synthesis Node):</strong> 
+                    <span id="agent-2-desc">Pulls the research payload and drafts long-form narrative streams while seamlessly integrating targeted anchor domains.</span>
+                </li>
+                <li>
+                    <strong style="color: #FF7D00;">3. Checky (The Quality Gate):</strong> 
+                    <span id="agent-3-desc">Reviews the narrative, enforces layout constraints, wipes out placeholders, and compiles the final product into production Markdown.</span>
+                </li>
+            </ul>
+        </div>
+
+        <button type="submit" style="width: 100%; background: #FF7D00; color: #05060B; border: none; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s;">
+            Proceed to Configuration
+        </button>
     </form>
 </div>
+
+<script>
+    const explanations = {
+        CURATOR: {
+            title: "ArtiCurator",
+            desc: "Curate and align information into an article for the topic and the hosting site of your selection.",
+            agent1: "Scans context matrix schemas, extracts live trends, and builds a comprehensive research brief.",
+            agent2: "Pulls the research payload and drafts long-form narrative streams while seamlessly integrating targeted anchor domains.",
+            agent3: "Reviews the narrative, enforces layout constraints, wipes out placeholders, and compiles the final product into production Markdown."
+        },
+        ACL: {
+            title: "ACL Generator",
+            desc: "Designed for engineering automated test environments, logic synthesis mapping, and core code pipeline scaffolding.",
+            agent1: "Analyzes system architecture inputs, technical requirements, and API constraints to define safe algorithmic rules.",
+            agent2: "Generates pure, production-grade test cases, scripts, and source blocks based on the established safety parameters.",
+            agent3: "Runs static code lint checks, verifies input execution boundaries, and structures deployment-ready asset suites."
+        }
+    };
+
+    function updateDynamicExplanation() {
+        const modeSelect = document.getElementById('mode');
+        const activeConfig = explanations[modeSelect.value];
+
+        document.getElementById('topology-title').textContent = activeConfig.title;
+        document.getElementById('topology-desc').textContent = activeConfig.desc;
+        document.getElementById('agent-1-desc').textContent = activeConfig.agent1;
+        document.getElementById('agent-2-desc').textContent = activeConfig.agent2;
+        document.getElementById('agent-3-desc').textContent = activeConfig.agent3;
+    }
+
+    updateDynamicExplanation();
+</script>
 {% endblock %}

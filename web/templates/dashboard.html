@@ -32,10 +32,22 @@
                 </td>
                 <td>{{ task.created_at|date:"Y-m-d H:i:s" }}</td>
                 <td style="text-align: right;">
-                    <a href="{% url 'edit_config' task.id %}" style="color: #00E5FF; text-decoration: none; margin-right: 10px;">Edit</a>
-                    <a href="{% url 'rerun_task' task.id %}" style="color: #10B981; text-decoration: none; margin-right: 10px;">Rerun</a>
-                    <a href="{% url 'duplicate_task' task.id %}" style="color: #E2E8F0; text-decoration: none; margin-right: 10px;">Duplicate</a>
-                    <a href="{% url 'delete_task' task.id %}" style="color: #EF4444; text-decoration: none;" onclick="return confirm('Delete task execution state?')">Delete</a>
+                    <a href="{% url 'config_form' %}?mode={{ task.mode }}&load_task_id={{ task.id }}"
+                        style="color: #00E5FF; text-decoration: none; margin-right: 15px; font-weight: 600;">
+                        Reuse Config
+                    </a>
+                    
+                    <a href="{% url 'execution_page' task.id %}"
+                        style="color: #10B981; text-decoration: none; margin-right: 15px; font-weight: 600;">
+                        View Logs
+                    </a>
+                    
+                    <form action="{% url 'delete_task' task.id %}" method="POST" style="display: inline-block; margin-left: 15px;">
+                        {% csrf_token %}
+                        <button type="submit" style="background: none; border: none; color: #EF4444; padding: 0; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none;">
+                            Delete
+                        </button>
+                    </form>
                 </td>
             </tr>
             {% empty %}

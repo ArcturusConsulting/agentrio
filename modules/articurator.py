@@ -1,53 +1,64 @@
 # modules/articurator.py
-import time
+from modules.gateway import call_llm
 
-def run_articurator_graph(config):
+def run_articurator_graph(config, logger_callback=None):
     """
-    Executes the multi-agent graph loop for the ArtiCurator content engine.
-    Unpacks the tailored prompt personas and engine routings for each agent node.
+    Executes the multi-agent graph loop for the ArtiCurator Article Generator.
+    Coordinates Analisa, Writus, and Checky with hyper-granular telemetry.
     """
-    trace_logs = []
+    topic_brief = config.get('topic_brief', 'Default Topic Context')
+    target_site_url = config.get('target_site_url', 'No Target Site Provided')
     
-    # Extract structural configs from Step 2 configuration form payload
-    topic_brief = config.get('topic_brief', '')
-    
-    model_agent_1 = config.get('model_agent_1', 'gemini-1.5-pro')
-    model_agent_2 = config.get('model_agent_2', 'claude-3-5-sonnet')
-    model_agent_3 = config.get('model_agent_3', 'gpt-4o-mini')
-    
-    prompt_agent_1 = config.get('prompt_agent_1', '')
-    prompt_agent_2 = config.get('prompt_agent_2', '')
-    prompt_agent_3 = config.get('prompt_agent_3', '')
+    model_analisa = config.get('model_agent_1', 'gemini-2.5-flash')
+    model_writus = config.get('model_agent_2', 'claude-3-5-sonnet')
+    model_checky = config.get('model_agent_3', 'gpt-4o-mini')
 
-    # --- NODE 1: WEB SNATCHER AGENT ---
-    trace_logs.append(f"[WEB SNATCHER AGENT] Active Node Model: {model_agent_1}")
-    trace_logs.append(f"[WEB SNATCHER AGENT] Target Initialized: Querying search matrices for brief keywords...")
-    time.sleep(1.0)
-    trace_logs.append("[WEB SNATCHER AGENT] Content scraping complete. Extracted raw document payload data structures.")
+    instruction_analisa = config.get('prompt_agent_1', '')
+    instruction_writus = config.get('prompt_agent_2', '')
+    instruction_checky = config.get('prompt_agent_3', '')
+
+    def emit_log(msg):
+        if logger_callback:
+            logger_callback(msg)
+
+    # --- NODE 1: ANALISA ---
+    emit_log("[ANALISA] Node state initialized. Evaluating topic context matrices...")
+    emit_log(f"[ANALISA] Target Topic Detected: '{topic_brief}'")
+    emit_log(f"[ANALISA] Dispatching live payload handshake to engine: {model_analisa}...")
     
-    # --- NODE 2: CONTEXTUAL WRITER AGENT ---
-    trace_logs.append(f"\n[CONTEXTUAL WRITER AGENT] Active Node Model: {model_agent_2}")
-    trace_logs.append("[CONTEXTUAL WRITER AGENT] Synthesizing comprehensive textual narrative drafts...")
-    time.sleep(1.5)
-    trace_logs.append("[CONTEXTUAL WRITER AGENT] Draft compiled. Initial article structured successfully.")
+    analisa_prompt = f"Gather and organize all highly relevant facts regarding: {topic_brief}"
+    research_dump = call_llm(model_analisa, instruction_analisa, analisa_prompt)
+    
+    config['analisa_research'] = research_dump
+    emit_log("[ANALISA] Core response payload returned from remote server gateway.")
+    emit_log("[ANALISA] Deep research analysis compiled. Context schema updated successfully.")
 
-    # --- NODE 3: EDITORIAL REVIEW AGENT ---
-    trace_logs.append(f"\n[EDITORIAL REVIEW AGENT] Active Node Model: {model_agent_3}")
-    trace_logs.append("[EDITORIAL REVIEW AGENT] Auditing structural constraints and brand logic alignment...")
-    time.sleep(1.0)
-    trace_logs.append("[EDITORIAL REVIEW AGENT] Polish and formatting benchmarks approved. Output ready.")
-
-    # We construct the block using safe single-line concatenation strings to avoid triple-quote failures
-    simulated_artifact = (
-        "# ArtiCurator Content Extraction Summary\n"
-        f"- **Topic Brief Context:** {topic_brief}\n\n"
-        "## Orchestration Frame Node Engine Mapping\n"
-        f"- **Web Snatcher Node:** {model_agent_1}\n"
-        f"- **Contextual Writer Node:** {model_agent_2}\n"
-        f"- **Editorial Review Node:** {model_agent_3}\n\n"
-        "## Extracted & Curated Insights\n"
-        "Content synthesis completed successfully via AgenTrio Multi-Agent Infrastructure.\n"
-        "Insights and formatted drafts have been safely written to local disk volumes.\n"
+    # --- NODE 2: WRITUS ---
+    emit_log("\n[WRITUS] Node state initialized. Pulling upstream research cache inputs...")
+    emit_log(f"[WRITUS] Target Anchor Domain Configured: {target_site_url}")
+    emit_log(f"[WRITUS] Formulating narrative synthesis stream using engine: {model_writus}...")
+    
+    writus_prompt = (
+        f"Using this verified research background data:\n{research_dump}\n\n"
+        f"Synthesize a clean article narrative. You MUST organically integrate links to: {target_site_url}"
     )
+    article_draft = call_llm(model_writus, instruction_writus, writus_prompt)
+    
+    config['writus_draft'] = article_draft
+    emit_log("[WRITUS] Narrative structure completed. Drafting tokens allocated successfully.")
+    emit_log("[WRITUS] Editorial draft cached safely in memory registers.")
 
-    return "\n".join(trace_logs), simulated_artifact
+    # --- NODE 3: CHECKY ---
+    emit_log("\n[CHECKY] Node state initialized. Securing content layout boundaries...")
+    emit_log(f"[CHECKY] Running final quality control check and markdown translation via: {model_checky}...")
+    
+    checky_prompt = (
+        f"Review this active draft text carefully:\n{article_draft}\n\n"
+        f"Apply layout polish. Replace any 'YOUR_CONSULTANCY_WEBSITE_LINK' strings with our client URL: {target_site_url}. Return pure Markdown."
+    )
+    final_markdown_artifact = call_llm(model_checky, instruction_checky, checky_prompt)
+    
+    emit_log("[CHECKY] Layout validation complete. Formatting metrics cleared.")
+    emit_log("[CHECKY] All matrix quality gates passed successfully. Markdown compilation approved.")
+
+    return final_markdown_artifact

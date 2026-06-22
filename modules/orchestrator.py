@@ -1,77 +1,55 @@
 # modules/orchestrator.py
+import sys
 import os
-import logging
-from datetime import datetime
 
-# Configure a clean console logger for tracking our multi-agent boundaries
-logger = logging.getLogger("agentrio.orchestrator")
+# Ensure the root project directory is in the Python path to clear import warnings
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Standard top-level architectural imports
+from modules.acl_generator import run_acl_agent_graph
+from modules.articurator import run_articurator_graph
+from web.models import AgentTask
+from web.utils import append_task_log 
 
 def execute_agent_task(task_id):
     """
-    The Central Orchestration Loop. Takes a database task ID, transitions its state,
-    routes it to the correct multi-agent sub-graph, and logs state transitions.
+    Orchestration state machine execution manager. Handles switching tasks from
+    PENDING -> RUNNING -> SUCCESS or FAILED, routing to the correct agent engine graph.
+    Uses top-level imports and a functional callback wrapper to keep graphs pure Python.
     """
-    # 1. Lazy import Django models to avoid early initialization circular errors
-    from web.models import AgentTask
-    
     try:
         task = AgentTask.objects.get(id=task_id)
     except AgentTask.DoesNotExist:
-        logger.error(f"Orchestrator Failure: Task ID #{task_id} not found in SQLite.")
-        return False
+        return
 
-    logger.info(f"===> [ORCHESTRATOR] Intercepted Task #{task.id} [{task.mode}]")
-    
-    # 2. Advance state to RUNNING
     task.status = 'RUNNING'
-    task.save()
-
-    # 3. Extract our isolated Anti-Corruption Layer configurations matching Step 2 Form
-    config = task.config_data
-
-    # Set up our local output paths based on the design rules
-    if task.mode == 'ACL':
-        artifacts_dir = os.path.join(os.getcwd(), 'outputs', 'acl')
-    else:
-        artifacts_dir = os.path.join(os.getcwd(), 'outputs', 'curator')
-        
-    os.makedirs(artifacts_dir, exist_ok=True)
+    task.save(update_fields=['status'])
     
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_filename = f"artifact_{task.mode}_{task.id}_{timestamp}.md"
-    output_path = os.path.join(artifacts_dir, output_filename)
-
+    # Define a clean runner-level callback function that maps pure string logs back to the database
+    def log_callback(message):
+        append_task_log(task.id, message)
+    
     try:
-        # 4. Route payload execution to the specific multi-agent micro-graphs passing full context
         if task.mode == 'ACL':
-            from modules.acl_generator import run_acl_agent_graph
-            logger.info("      Routing execution token to [ACL Generator Graph Engine]...")
-            execution_log, artifact_content = run_acl_agent_graph(config)
-            
-        elif task.mode == 'CURATOR':
-            from modules.articurator import run_articurator_graph
-            logger.info("      Routing execution token to [ArtiCurator Loop Engine]...")
-            execution_log, artifact_content = run_articurator_graph(config)
-            
+            artifact = run_acl_agent_graph(task.config_data, logger_callback=log_callback)
         else:
-            raise ValueError(f"Unknown Operational Orchestrator Mode: {task.mode}")
-
-        # 5. Commit generated physical artifact payload to storage disk
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(artifact_content)
-
-        # 6. Capture full execution trace matching the template key, and finish task
+            artifact = run_articurator_graph(task.config_data, logger_callback=log_callback)
+            
         task.status = 'SUCCESS'
-        task.output_file_path = output_path
-        task.config_data['execution_logs'] = execution_log
-        task.save()
+        task.config_data["final_artifact"] = artifact
+        task.save(update_fields=['status', 'config_data'])
         
-        logger.info(f"===> [ORCHESTRATOR] Task #{task.id} completed successfully. Artifact saved.")
-        return True
-
     except Exception as e:
-        logger.error(f"!!! [ORCHESTRATOR ERROR] Task #{task.id} Failed: {str(e)}")
-        task.status = 'FAILED'
-        task.config_data['execution_logs'] = f"Execution Interrupted: {str(e)}"
-        task.save()
-        return False
+            import traceback
+            print("\n!!! GRAPH EXECUTION CRASH DETECTED !!!")
+            traceback.print_exc()  # This forces the full error stack to print directly to your terminal screen
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+            
+            task.status = 'FAILED'
+            # Copy the dictionary explicitly to ensure Django registers the internal mutation layout change
+            updated_config = dict(task.config_data)
+            updated_config["error_message"] = str(e)
+            updated_config["execution_logs"] = [f"[CRITICAL ERROR] Graph aborted: {str(e)}"]
+            
+            task.config_data = updated_config
+            task.save() # Save the whole object to force database sync updates

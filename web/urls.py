@@ -15,4 +15,5 @@ urlpatterns = [
     path('tasks/<int:task_id>/duplicate/', views.duplicate_task_view, name='duplicate_task'),
     path('tasks/<int:task_id>/delete/', views.delete_task_view, name='delete_task'),
     path('execution/<int:task_id>/status/', views.task_status_api, name='task_status_api'),
+    path('api/task/<int:task_id>/logs/', views.get_task_logs_api, name='get_task_logs_api'),
 ]
