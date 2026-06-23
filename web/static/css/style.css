@@ -1,0 +1,21 @@
+/* Force inputs to stay dark even during auto-fill */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #0A0D1A inset !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Base style for all your form inputs */
+.form-input {
+    width: 100%;
+    padding: 12px;
+    background: #0A0D1A;
+    border: 1px solid #1E2238;
+    color: #FFFFFF;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+}

@@ -1,4 +1,5 @@
 # modules/articurator.py
+from web.utils import get_token_safe_calendar_manifest
 from modules.gateway import call_llm
 
 def run_articurator_graph(config, logger_callback=None):
@@ -9,6 +10,11 @@ def run_articurator_graph(config, logger_callback=None):
     topic_brief = config.get('topic_brief', 'Default Topic Context')
     target_site_url = config.get('target_site_url', 'No Target Site Provided')
     
+    length = config.get('length', '3')  
+    tone = config.get('tone', 'Formal')  
+    
+    live_research_data = config.get('live_research_data', '')
+    target_site_context = config.get('target_site_context', 'No live site data collected.')    
     model_analisa = config.get('model_agent_1', 'gemini-2.5-flash')
     model_writus = config.get('model_agent_2', 'claude-3-5-sonnet')
     model_checky = config.get('model_agent_3', 'gpt-4o-mini')
@@ -21,44 +27,104 @@ def run_articurator_graph(config, logger_callback=None):
         if logger_callback:
             logger_callback(msg)
 
+    current_date = config.get('current_system_date', 'June 2026')
+
     # --- NODE 1: ANALISA ---
-    emit_log("[ANALISA] Node state initialized. Evaluating topic context matrices...")
-    emit_log(f"[ANALISA] Target Topic Detected: '{topic_brief}'")
-    emit_log(f"[ANALISA] Dispatching live payload handshake to engine: {model_analisa}...")
+    emit_log(f"[ANALISA] Alright! I'm researching on: '{topic_brief}'")
     
-    analisa_prompt = f"Gather and organize all highly relevant facts regarding: {topic_brief}"
+    #1 Granular debugging log to verify exactly what Tavily passed into the graph
+    if not live_research_data:
+        emit_log("[DEBUG LOG] WARNING: live_research_data payload is completely empty!")
+
+    analisa_prompt = (
+        f"CRITICAL CHRONOLOGY: The current date is {current_date}. All real-time web data provided "
+        f"is from this timeframe. You must organize your facts strictly within this timeline.\n\n"
+        f"Gather and organize all highly relevant facts regarding: {topic_brief}"
+    )
+
+    if live_research_data:
+        analisa_prompt += f"\n\nUse this real-time web research context to verify your facts:\n{live_research_data}"
+        
     research_dump = call_llm(model_analisa, instruction_analisa, analisa_prompt)
     
-    config['analisa_research'] = research_dump
-    emit_log("[ANALISA] Core response payload returned from remote server gateway.")
-    emit_log("[ANALISA] Deep research analysis compiled. Context schema updated successfully.")
+# 2. YOUR FIX: Print exactly what Analisa compiled before Writus touches it
+    emit_log("\n================= ANALISA'S REPORT SUMMARY =================")
+    if research_dump:
+        # Show the first 300 characters to verify if SPCX/2026 details made it through
+        emit_log(f"{research_dump[:300]}...")
+    else:
+        emit_log("!!! CRITICAL: research_dump is completely empty! Analisa returned nothing.")
+    print("==================================================================\n")
 
-    # --- NODE 2: WRITUS ---
-    emit_log("\n[WRITUS] Node state initialized. Pulling upstream research cache inputs...")
-    emit_log(f"[WRITUS] Target Anchor Domain Configured: {target_site_url}")
-    emit_log(f"[WRITUS] Formulating narrative synthesis stream using engine: {model_writus}...")
+    # config['analisa_research'] = research_dump
+    emit_log("[ANALISA] Done! Writus, here is what I found.")
+
+   # --- NODE 2: WRITUS ---
+    emit_log(f"[WRITUS] Great. Now I'll connect the story to the hosting site: {target_site_url}")
     
+    calendar_reference = get_token_safe_calendar_manifest()
+
     writus_prompt = (
-        f"Using this verified research background data:\n{research_dump}\n\n"
-        f"Synthesize a clean article narrative. You MUST organically integrate links to: {target_site_url}"
+        f"CRITICAL CHRONOLOGY: The current date and time is {current_date}.\n\n"
+        
+        f"STAGE 1: CRITICAL CALENDAR TRUTH MATRIX (Use this to align days and dates correctly):\n"
+        f"{calendar_reference}\n\n"
+        
+        f"STAGE 2: VERIFIED RESEARCH BACKGROUND DATA COMPILED BY ANALISA:\n"
+        f"{research_dump}\n\n"
+    )  
+
+    if target_site_context:
+        writus_prompt += (
+            f"STAGE 3: LIVE TARGET WEBSITE SCRAPE/CONTEXT:\n"
+            f"{target_site_context}\n"
+            f"------------------------------------------\n\n"
+            f"Review the website context above. Identify their precise services, industry vertical, "
+            f"and branding tone so your backlink integration looks seamless and organic.\n\n"
+        )
+        
+    writus_prompt += (
+        f"COMPOSITION INSTRUCTIONS:\n"
+        f"1. Synthesize a clean article narrative. You MUST organically integrate links to: {target_site_url}\n"
+        f"2. CHRONOLOGY RULE: Cross-reference every day-of-the-week or date sequence you write against the STAGE 1 Calendar Grid. "
+        f"Do not guess. Ensure weekends and federal holidays (like Juneteenth) are handled accurately based on the grid structure.\n\n"
+        f"Return the drafted narrative text."
     )
+    
     article_draft = call_llm(model_writus, instruction_writus, writus_prompt)
     
-    config['writus_draft'] = article_draft
-    emit_log("[WRITUS] Narrative structure completed. Drafting tokens allocated successfully.")
-    emit_log("[WRITUS] Editorial draft cached safely in memory registers.")
+    # config['writus_draft'] = article_draft
+    emit_log("[WRITUS] Ok, my part is over now, Checky.")
 
     # --- NODE 3: CHECKY ---
-    emit_log("\n[CHECKY] Node state initialized. Securing content layout boundaries...")
-    emit_log(f"[CHECKY] Running final quality control check and markdown translation via: {model_checky}...")
-    
+    emit_log(f"[CHECKY] Thank you. At last, I am going to edit and polish the article.")
+
+    # Generate the pristine live grid
+    # CRITICAL UPDATE: Pass the live_research_data to Checky as well,
+    # and add rule #4 to prevent the editor from altering breaking 2026 facts.
     checky_prompt = (
-        f"Review this active draft text carefully:\n{article_draft}\n\n"
-        f"Apply layout polish. Replace any 'YOUR_CONSULTANCY_WEBSITE_LINK' strings with our client URL: {target_site_url}. Return pure Markdown."
+        f"CRITICAL CHRONOLOGY: The current date and time is {current_date}.\n\n"
+        
+        f"STAGE 1: CRITICAL CALENDAR TRUTH MATRIX (Use this to verify weekdays):\n"
+        f"{calendar_reference}\n\n"
+        
+        f"STAGE 2: VERIFIED SOURCE MATERIAL (ANALISA RESEARCH):\n"
+        f"{research_dump}\n\n"
+        
+        f"STAGE 3: ACTIVE DRAFT TEXT TO EDIT (WRITUS DRAFT):\n"
+        f"{article_draft}\n\n"
+        
+        f"CRITICAL COMPLIANCE EDITING:\n"
+        f"1. WEEKDAY ALIGNMENT RULE: Cross-reference every mentioned date in the active draft against the STAGE 1 Calendar Grid. "
+        f"Ensure no weekend days are described as open trading sessions, and verify that holidays or events line up exactly with the true calendar layout.\n"
+        f"2. FACT-CHECKING RULE: Cross-reference the draft against STAGE 2 source material. Forcefully overwrite any numerical or factual inconsistencies.\n"
+        f"3. The final text MUST be approximately {length} minute(s) of total reading time (roughly 200-250 words per minute).\n"
+        f"4. Enforce a strict {tone.lower()} tone seamlessly throughout the piece.\n"
+        f"5. Apply crisp structural layout polish. Replace any 'YOUR_CONSULTANCY_WEBSITE_LINK' strings with our client URL: {target_site_url}.\n\n"
+        f"Return the polished, trimmed, and calendar-verified result as pure Markdown."
     )
     final_markdown_artifact = call_llm(model_checky, instruction_checky, checky_prompt)
     
-    emit_log("[CHECKY] Layout validation complete. Formatting metrics cleared.")
-    emit_log("[CHECKY] All matrix quality gates passed successfully. Markdown compilation approved.")
+    emit_log(f"[CHECKY] Thank you for your patience, it's done! The finished article is below.")
 
     return final_markdown_artifact

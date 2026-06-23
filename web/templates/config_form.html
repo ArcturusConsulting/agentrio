@@ -10,26 +10,6 @@
     </p>
 </header>
 
-<div class="card">
-    <h2 class="card-title">Load Saved Baseline Persona Matrix</h2>
-    <form method="GET" action="{% url 'config_form' %}">
-        <input type="hidden" name="mode" value="{{ mode }}">
-        <div class="form-group" style="display: flex; gap: 15px; align-items: flex-end;">
-            <div style="flex-grow: 1;">
-                <label for="template_select">Select Saved Template</label>
-                <select name="template_id" id="template_select" onchange="this.form.submit()">
-                    <option value="">-- Use Default Hardcoded Personas --</option>
-                    {% for tmpl in saved_templates %}
-                        <option value="{{ tmpl.id }}" {% if selected_template_id == tmpl.id|slugify %}selected{% endif %}>
-                            {{ tmpl.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-    </form>
-</div>
-
 <form method="POST" action="{% url 'config_form' %}?mode={{ mode }}" enctype="multipart/form-data">
     {% csrf_token %}
     <input type="hidden" name="mode" value="{{ mode }}">
@@ -52,43 +32,47 @@
                 <label for="topic_brief">Topic brief / keywords for the article:</label>
                 <textarea name="topic_brief" id="topic_brief" rows="3" placeholder="Enter topic configuration instructions, raw concepts, or content keywords...">{{ config.topic_brief }}</textarea>
             </div>
-            <div class="form-group" style="margin-top: 15px;">
-                <label for="target_site_url">URL of the website that hosts the generated article:</article></label>
-                <input type="text" name="target_site_url" id="target_site_url" value="{{ config.target_site_url }}" placeholder="https://example.com/target-domain" style="width: 100%;">
+            
+            <input type="text" 
+            name="target_site_url" 
+            id="target_site_url" 
+            value="{{ config.target_site_url }}" 
+            placeholder="https://example.com/target-domain" 
+            spellcheck="false" 
+            style="width: 100%; 
+                   padding: 12px; 
+                   background: #0A0D1A; 
+                   border: 1px solid #1E2238; 
+                   color: #FFFFFF; 
+                   border-radius: 6px; 
+                   font-size: 14px; 
+                   outline: none;">
+
+            <div class="form-group">
+                <label for="length">Article Length (Minutes):</label>
+                <select name="length" id="length" class="form-input">
+                    <option value="1">1 Minute</option>
+                    <option value="3">3 Minutes</option>
+                    <option value="5">5 Minutes</option>
+                </select>
             </div>
 
+            <div class="form-group">
+                <label for="tone">Tone:</label>
+                <select name="tone" id="tone" class="form-input">
+                    <option value="Formal">Formal (Professional/Academic)</option>
+                    <option value="Conversational">Conversational (Friendly/Approachable)</option>
+                    <option value="Persuasive">Persuasive (Assertive/Impactful)</option>
+                    <option value="Optimistic">Optimistic (Uplifting/Hopeful)</option>
+                </select>
+            </div>
         {% endif %}
     </div>
 
-    <div class="card">
-        <h2 class="card-title">2. Dynamic Prompt Manager (Agent Personas)</h2>
-        <p style="color: #64748B; font-size: 13px; margin-top: -15px; margin-bottom: 20px;">
-            Review or modify the behavior constraints directly inside the active template context.
-        </p>
-
-        <div class="form-group">
-            <label>Agent 1 Persona Prompt</label>
-            <textarea name="prompt_agent_1" rows="4" required>{{ prompts.agent_1 }}</textarea>
-        </div>
-        <div class="form-group">
-            <label>Agent 2 Persona Prompt</label>
-            <textarea name="prompt_agent_2" rows="4" required>{{ prompts.agent_2 }}</textarea>
-        </div>
-        <div class="form-group">
-            <label>Agent 3 Persona Prompt</label>
-            <textarea name="prompt_agent_3" rows="4" required>{{ prompts.agent_3 }}</textarea>
-        </div>
-
-        <div style="border-top: 1px solid #1E2238; margin-top: 25px; padding-top: 20px;">
-            <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
-                <input type="checkbox" name="save_as_template" id="save_as_template" style="width: auto; margin: 0;">
-                <label for="save_as_template" style="margin: 0; color: #FFFFFF; font-weight: 600;">Save these active modifications as a reusable persona template</label>
-            </div>
-            <div class="form-group" style="margin-top: 10px;">
-                <label for="new_template_name">New Template Profile Name</label>
-                <input type="text" name="new_template_name" id="new_template_name" placeholder="e.g., Strict-SQL-Mapper or Technical-Blog-Voice">
-            </div>
-        </div>
+    <div style="display: none;">
+        <input type="hidden" name="prompt_agent_1" value="{{ prompts.agent_1 }}">
+        <input type="hidden" name="prompt_agent_2" value="{{ prompts.agent_2 }}">
+        <input type="hidden" name="prompt_agent_3" value="{{ prompts.agent_3 }}">
     </div>
 
     <div class="card">
@@ -96,31 +80,67 @@
         
         <div class="form-group">
             <label for="model_agent_1">Agent 1 Model Engine Mapping</label>
-            <select name="model_agent_1" id="model_agent_1">
-                <option value="claude-3-5-sonnet" {% if config.model_agent_1 == "claude-3-5-sonnet" %}selected{% endif %}>Anthropic - claude-3-5-sonnet</option>
-                <option value="gpt-4o-mini" {% if config.model_agent_1 == "gpt-4o-mini" %}selected{% endif %}>OpenAI - gpt-4o-mini</option>
-                <option value="gemini-1.5-flash" {% if config.model_agent_1 == "gemini-1.5-flash" or not config.model_agent_1 %}selected{% endif %}>Google - gemini-1.5-flash</option>
-                <option value="llama3-70b-8192">Groq - Llama 3 (70B)</option>
+            <select name="model_agent_1" id="model_agent_1" class="form-select">
+                <option value="gemini-2.5-flash" 
+                        {% if config.model_agent_1 == "gemini-2.5-flash" or not config.model_agent_1 %}selected{% endif %}>
+                    Google — gemini-2.5-flash (Default)
+                </option>
+                <option value="claude-sonnet-4-6" 
+                        {% if config.model_agent_1 == "claude-sonnet-4-6" %}selected{% endif %}>
+                    Anthropic — Claude Sonnet
+                </option>
+                <option value="gpt-4o-mini" 
+                        {% if config.model_agent_1 == "gpt-4o-mini" %}selected{% endif %}>
+                    OpenAI — gpt-4o-mini
+                </option>
+                <option value="llama3-70b-8192" 
+                        {% if config.model_agent_1 == "llama3-70b-8192" %}selected{% endif %}>
+                    Groq — Llama 3 (70B)
+                </option>
             </select>
         </div>
-
+        
         <div class="form-group">
             <label for="model_agent_2">Agent 2 Model Engine Mapping</label>
-            <select name="model_agent_2" id="model_agent_2">
-                <option value="claude-3-5-sonnet" {% if config.model_agent_2 == "claude-3-5-sonnet" or not config.model_agent_2 %}selected{% endif %}>Anthropic - claude-3-5-sonnet</option>
-                <option value="gpt-4o-mini" {% if config.model_agent_2 == "gpt-4o-mini" %}selected{% endif %}>OpenAI - gpt-4o-mini</option>
-                <option value="gemini-1.5-flash" {% if config.model_agent_1 == "gemini-1.5-flash" or not config.model_agent_1 %}selected{% endif %}>Google - gemini-1.5-flash</option>
-                <option value="llama3-70b-8192">Groq - Llama 3 (70B)</option>
+            <select name="model_agent_2" id="model_agent_2" class="form-select">
+                <option value="claude-sonnet-4-6" 
+                        {% if config.model_agent_2 == "claude-sonnet-4-6" or not config.model_agent_2 %}selected{% endif %}>
+                    Anthropic — Claude Sonnet (Default)
+                </option>
+                <option value="gemini-2.5-flash" 
+                        {% if config.model_agent_2 == "gemini-2.5-flash" %}selected{% endif %}>
+                    Google — gemini-2.5-flash
+                </option>
+                <option value="gpt-4o-mini" 
+                        {% if config.model_agent_2 == "gpt-4o-mini" %}selected{% endif %}>
+                    OpenAI — gpt-4o-mini
+                </option>
+                <option value="llama3-70b-8192" 
+                        {% if config.model_agent_2 == "llama3-70b-8192" %}selected{% endif %}>
+                    Groq — Llama 3 (70B)
+                </option>
             </select>
         </div>
-
+        
         <div class="form-group">
             <label for="model_agent_3">Agent 3 Model Engine Mapping</label>
-            <select name="model_agent_3" id="model_agent_3">
-                <option value="claude-3-5-sonnet" {% if config.model_agent_3 == "claude-3-5-sonnet" %}selected{% endif %}>Anthropic - claude-3-5-sonnet</option>
-                <option value="gpt-4o-mini" {% if config.model_agent_3 == "gpt-4o-mini" or not config.model_agent_3 %}selected{% endif %}>OpenAI - gpt-4o-mini</option>
-                <option value="gemini-1.5-flash" {% if config.model_agent_1 == "gemini-1.5-flash" or not config.model_agent_1 %}selected{% endif %}>Google - gemini-1.5-flash</option>
-                <option value="llama3-70b-8192">Groq - Llama 3 (70B)</option>
+            <select name="model_agent_3" id="model_agent_3" class="form-select">
+                <option value="gpt-4o-mini" 
+                        {% if config.model_agent_3 == "gpt-4o-mini" or not config.model_agent_3 %}selected{% endif %}>
+                    OpenAI — gpt-4o-mini (Default)
+                </option>
+                <option value="claude-sonnet-4-6" 
+                        {% if config.model_agent_3 == "claude-sonnet-4-6" %}selected{% endif %}>
+                    Anthropic — Claude Sonnet
+                </option>
+                <option value="gemini-2.5-flash" 
+                        {% if config.model_agent_3 == "gemini-2.5-flash" %}selected{% endif %}>
+                    Google — gemini-2.5-flash
+                </option>
+                <option value="llama3-70b-8192" 
+                        {% if config.model_agent_3 == "llama3-70b-8192" %}selected{% endif %}>
+                    Groq — Llama 3 (70B)
+                </option>
             </select>
         </div>
 
