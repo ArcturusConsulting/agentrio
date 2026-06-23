@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,8 +80,10 @@
 <body>
 
     <div class="nav-bar">
-        <div class="nav-logo">AgenTrio <span style="color: #00E5FF; font-size: 12px;">v2.0</span></div>
-        <div class="nav-links">
+        <div class="nav-logo" style="display: flex; align-items: center; gap: 8px;">
+            <img src="{% static 'images/AgenTrio_logo_white.png' %}" alt="AgenTrio" style="height: 24px; width: auto; display: inline-block;">
+            <span style="color: #00E5FF; font-size: 12px; margin-top: 2px;">v2.0</span>
+        </div>        <div class="nav-links">
             <a href="{% url 'select_mode' %}">[ Home ]</a>
             <a href="{% url 'dashboard' %}">[ dashboard ]</a>
         </div>

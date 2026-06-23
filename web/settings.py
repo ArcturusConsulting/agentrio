@@ -116,3 +116,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Add this block so Django finds the files inside web/static/ during local development
+STATICFILES_DIRS = [
+    BASE_DIR / 'web' / 'static',
+]
