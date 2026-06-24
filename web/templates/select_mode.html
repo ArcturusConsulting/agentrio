@@ -15,7 +15,7 @@
         AgenTrio is a next-generation multi-agent coordination system driven by three specialized agentts: 
         <strong>Analisa</strong>, <strong>Writus</strong>, and <strong>Checky</strong>. Rather than executing flat prompts, 
         these agents operate as a collaborative graph network—passing structured memory payloads down the line to solve 
-        complex, multi-step execution processes autonomously.
+        complex, multi-step execution processes.
     </p>
 </div>
 
@@ -78,7 +78,6 @@
                 Selected Execution Mode: <span id="topology-title">ArtiCurator</span>
             </h3>
             <p id="topology-desc" style="color: #94A3B8; margin-bottom: 15px;">
-                Optimized for content localization, high-end whitepapers, and strategic marketing material synthesis.
             </p>
             
             <ul style="list-style: none; padding: 0; margin: 0;">
@@ -107,10 +106,10 @@
     const explanations = {
         ARTICURATOR: {
             title: "ArtiCurator",
-            desc: "Curate and align information into an article for the topic and the hosting site of your selection.",
-            agent1: "Scans context matrix schemas, extracts live trends, and builds a comprehensive research brief.",
-            agent2: "Pulls the research payload and drafts long-form narrative streams while seamlessly integrating targeted anchor domains.",
-            agent3: "Reviews the narrative, enforces layout constraints, wipes out placeholders, and compiles the final product into production Markdown."
+            desc: "<span style='color: #FFFFFF;'>Curate an article based on user request.</span><br><br><strong style='color: #FFFFFF;'>Recommended LLM for this mode:</strong><strong style='color: #FF7D00;'> Gemini 2.5 Flash.</strong>",
+            agent1: "Scans relevant contents from the web and report the findings.",
+            agent2: "Write up a story that contexualizes Analisa's research for a target website.",
+            agent3: "Edit and finish the article Writus has written to meet the user request."
         },
         ACLGENERATOR: {
             title: "ACLGenerator",
@@ -126,7 +125,7 @@
         const activeConfig = explanations[modeSelect.value];
 
         document.getElementById('topology-title').textContent = activeConfig.title;
-        document.getElementById('topology-desc').textContent = activeConfig.desc;
+        document.getElementById('topology-desc').innerHTML = activeConfig.desc;
         document.getElementById('agent-1-desc').textContent = activeConfig.agent1;
         document.getElementById('agent-2-desc').textContent = activeConfig.agent2;
         document.getElementById('agent-3-desc').textContent = activeConfig.agent3;
