@@ -95,7 +95,7 @@ def fetch_live_market_data(topic_brief):
         "api_key": api_key,
         "query": topic_brief,
         "search_depth": "basic",
-        "max_results": 3,
+        "max_results": 10,
         "topic": "news"
     }
     

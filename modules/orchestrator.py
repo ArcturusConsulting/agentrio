@@ -27,7 +27,7 @@ def execute_agent_task(task_id):
 
     task.status = 'RUNNING'
     task.save(update_fields=['status'])
-    
+  
     # Define a clean runner-level callback function that maps pure string logs back to the database
     def log_callback(message):
         append_task_log(task.id, message)
@@ -40,7 +40,7 @@ def execute_agent_task(task_id):
             topic = task.config_data.get("topic_brief", "")
             target_url = task.config_data.get("target_site_url", "")
             
-            # Generates a granular timestamp like: "June 23, 2026, 19:27 UTC"
+            # Generates a granular timestamp like: "June 24, 2026, 21:46 UTC"
             current_date_str = datetime.now().strftime("%B %d, %Y, %H:%M UTC") 
 
             # Vector A: News/Topic Research for Analisa
@@ -59,21 +59,33 @@ def execute_agent_task(task_id):
             task.save() # Forces full synchronous database payload write
 
             artifact = run_articurator_graph(task.config_data, logger_callback=log_callback)        
-        task.status = 'SUCCESS'
-        task.config_data["final_artifact"] = artifact
-        task.save(update_fields=['status', 'config_data'])
+        
+        # 💡 THE ATOMIC FIX: Update the database record directly by ID query.
+        # This writes ONLY the status change and final_artifact string down to SQLite,
+        # preventing the stale in-memory task dictionary from wiping out your logs!
+        AgentTask.objects.filter(id=task_id).update(
+            status='SUCCESS',
+            config_data={
+                **task.config_data,
+                "final_artifact": artifact
+            }
+        )
         
     except Exception as e:
-            import traceback
-            print("\n!!! GRAPH EXECUTION CRASH DETECTED !!!")
-            traceback.print_exc()  # This forces the full error stack to print directly to your terminal screen
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+        import traceback
+        print("\n!!! GRAPH EXECUTION CRASH DETECTED !!!")
+        traceback.print_exc()
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+        
+        # Crash Protection: Safely isolate the FAILED status update using atomic updates as well
+        try:
+            current_task = AgentTask.objects.get(id=task_id)
+            failed_config = dict(current_task.config_data)
+            failed_config["error_message"] = str(e)
             
-            task.status = 'FAILED'
-            # Copy the dictionary explicitly to ensure Django registers the internal mutation layout change
-            updated_config = dict(task.config_data)
-            updated_config["error_message"] = str(e)
-            updated_config["execution_logs"] = [f"[CRITICAL ERROR] Graph aborted: {str(e)}"]
-            
-            task.config_data = updated_config
-            task.save() # Save the whole object to force database sync updates
+            AgentTask.objects.filter(id=task_id).update(
+                status='FAILED',
+                config_data=failed_config
+            )
+        except Exception as nested_err:
+            print(f"[CRITICAL ERROR] Failed to record task failure state: {nested_err}")

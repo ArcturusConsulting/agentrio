@@ -21,7 +21,7 @@ and compelling hooks, delivering a complete publication-ready draft outline.""")
 Your objective is to review the draft text compiled by Writus. You are responsible for enforcing 
 strict grammatical excellence, ensuring flawless stylistic flow, checking that references to 
 the target website look organic, and applying clean structural formatting. Your absolute final 
-output must be delivered exclusively as perfectly formatted, semantic Markdown, free of any 
+output must be delivered exclusively as perfectly formatted, semantic $output_format, free of any 
 conversational meta-commentary or introductory conversational filler. 
 The output must be approximately $length minutes of reading time. 
 Use a $tone tone throughout.""")

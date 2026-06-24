@@ -28,7 +28,13 @@ Awaiting orchestration frame logs...</pre>
 </div>
 
 <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 25px;">
-    <a href="{% url 'dashboard' %}" style="background-color: #1E293B; color: #FFFFFF; text-decoration: none; padding: 14px 20px; font-size: 14px; font-weight: 700; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Go to Dashboard</a>
+    <a href="{% url 'dashboard' %}" style="background-color: #1E293B; color: #FFFFFF; text-decoration: none; padding: 14px 20px; font-size: 14px; font-weight: 700; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+        Go to Dashboard
+    </a>
+
+    <button id="export-btn" onclick="downloadGeneratedArtifact()" style="display: none; background-color: #10B981; color: #05060B; border: none; padding: 14px 25px; font-size: 14px; font-weight: 700; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;">
+        Export Artifact
+    </button>
 </div>
 
 <script>
@@ -37,28 +43,37 @@ Awaiting orchestration frame logs...</pre>
     const badge = document.getElementById('status-badge');
     const artifactCard = document.getElementById('artifact-card');
     const artifactContent = document.getElementById('artifact-content');
+    const exportBtn = document.getElementById('export-btn');
+
+    let finalArtifactPayload = `{{ task.config_data.final_artifact|escapejs }}`;
 
     function pollExecutionState() {
         fetch(`/api/task/${taskId}/logs/`)
             .then(response => response.json())
             .then(data => {
-                // Update state status indicator text
                 badge.textContent = data.status;
 
-                // 1. Render rolling text strings out of JSON arrays
+                // 💡 THE FIX: Check that logs actually exist AND have content before changing the screen
                 if (data.logs && data.logs.length > 0) {
-                    terminal.textContent = data.logs.join('\n');
-                    terminal.scrollTop = terminal.scrollHeight; // Auto-scroll down
+                    if (Array.isArray(data.logs)) {
+                        terminal.textContent = data.logs.join('\n');
+                    } else {
+                        terminal.textContent = data.logs;
+                    }
+                    terminal.scrollTop = terminal.scrollHeight;
                 }
 
-                // 2. Telemetry State Machine Evaluator
                 if (data.status === 'SUCCESS') {
                     badge.style.borderColor = '#10B981';
                     badge.style.color = '#10B981';
                     
                     if (data.artifact) {
+                        finalArtifactPayload = data.artifact; 
                         artifactContent.textContent = data.artifact;
-                        artifactCard.style.display = 'block';
+                        artifactCard.style.display = 'block'; // This reveals your green line card!
+                    }
+                    if (exportBtn) {
+                        exportBtn.style.display = 'inline-block'; 
                     }
                 } 
                 else if (data.status === 'FAILED') {
@@ -68,18 +83,53 @@ Awaiting orchestration frame logs...</pre>
                     terminal.scrollTop = terminal.scrollHeight;
                 } 
                 else {
-                    // Continue polling every 750ms while task is PENDING or RUNNING
                     setTimeout(pollExecutionState, 750);
                 }
             })
             .catch(err => {
                 console.error("Telemetry pipeline connection link dropped:", err);
-                // Try to reconnect even if a single poll attempt drops out
                 setTimeout(pollExecutionState, 2000);
             });
     }
 
-    // Initialize telemetry polling tracking on component mount stage
+    function downloadGeneratedArtifact() {
+        if (!finalArtifactPayload) {
+            alert("No text content found to export!");
+            return;
+        }
+
+        const selectedFormat = "{{ output_format }}";
+        let extension = ".txt";
+        let mimeType = "text/plain";
+
+        if (selectedFormat === "Markdown") {
+            extension = ".md";
+            mimeType = "text/markdown";
+        } else if (selectedFormat === "HTML") {
+            extension = ".html";
+            mimeType = "text/html";
+        } else if (selectedFormat === "JSON") {
+            extension = ".json";
+            mimeType = "application/json";
+        } else if (selectedFormat === "Python") {
+            extension = ".py";
+            mimeType = "text/x-python";
+        }
+
+        const filename = `agentrio_task_#${taskId}${extension}`;
+        const blob = new Blob([finalArtifactPayload], { type: mimeType });
+        const downloadLink = document.createElement("a");
+        
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(blob);
+        downloadLink.style.display = "none";
+        
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+
+    // Initialize Poller
     pollExecutionState();
 </script>
 {% endblock %}

@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}AgenTrio Operational Control Center{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/AgenTrio_Favicon.png' %}">
     <style>
         * { box-sizing: border-box; }
         body {
@@ -83,7 +84,7 @@
     <div class="nav-bar">
         <div class="nav-logo" style="display: flex; align-items: center; gap: 8px;">
             <img src="{% static 'images/AgenTrio_logo_white.png' %}" alt="AgenTrio" style="height: 24px; width: auto; display: inline-block;">
-            <span style="color: #00E5FF; font-size: 12px; margin-top: 2px;">v2.0</span>
+            <span style="color: #00E5FF; font-size: 12px; margin-top: 2px;">v0.2.0 alpha</span>
         </div>        <div class="nav-links">
             <a href="{% url 'select_mode' %}">[ Home ]</a>
             <a href="{% url 'dashboard' %}">[ dashboard ]</a>

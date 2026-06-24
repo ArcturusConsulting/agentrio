@@ -12,7 +12,7 @@ from modules.personas import PERSONAS
 def select_mode_view(request):
     """Step 1: Choose Operational Mode"""
     if request.method == 'POST':
-        mode = request.POST.get('mode', 'ACL')
+        mode = request.POST.get('mode', 'ARTICURATOR')
         return redirect(f'/configure/?mode={mode}')
     return render(request, 'select_mode.html')
 
@@ -22,6 +22,7 @@ def config_form_view(request):
     DEFAULT_MODE = 'ARTICURATOR'
     DEFAULT_LENGTH = '3'
     DEFAULT_TONE = 'Formal'
+    DEFAULT_FORMAT = 'Plaintext'
     
     mode = request.GET.get('mode', DEFAULT_MODE)
     load_task_id = request.GET.get('load_task_id', '')
@@ -46,7 +47,8 @@ def config_form_view(request):
         # Use the SAME defaults here as in the GET logic
         length = request.POST.get('length', DEFAULT_LENGTH)
         tone = request.POST.get('tone', DEFAULT_TONE)
-        
+        output_format = request.POST.get('format', DEFAULT_FORMAT)        
+
         # Get the template dictionary for the selected mode
         mode_templates = PERSONAS.get(mode, PERSONAS.get(DEFAULT_MODE))
         
@@ -57,13 +59,14 @@ def config_form_view(request):
             "model_agent_3": request.POST.get('model_agent_3'),
             "length": length,
             "tone": tone,
+            "format": output_format,
         }
         
         # Fill in the prompts
         for key in ['agent_1', 'agent_2', 'agent_3']:
             template = mode_templates[key]
             if mode == 'ARTICURATOR':
-                packed_config[f"prompt_{key}"] = template.substitute(length=length, tone=tone)
+                packed_config[f"prompt_{key}"] = template.substitute(length=length, tone=tone, output_format=output_format)
             else:
                 packed_config[f"prompt_{key}"] = template.safe_substitute()
         
@@ -97,9 +100,10 @@ def config_form_view(request):
     # 4. Fallback GET (Context now includes the loaded config strings!)
     display_length = config_context.get("length", DEFAULT_LENGTH)
     display_tone = config_context.get("tone", DEFAULT_TONE)
+    display_format = config_context.get("format", DEFAULT_FORMAT)
 
     rendered_prompts = {
-        k: v.safe_substitute(length=display_length, tone=display_tone) 
+        k: v.safe_substitute(length=display_length, tone=display_tone, output_format=display_format) 
         for k, v in prompts.items()
     }
     
@@ -113,7 +117,14 @@ def config_form_view(request):
 def execution_page_view(request, task_id):
     """Step 3: Real-Time Telemetry Pipeline Screen Rendering"""
     task = get_object_or_404(AgentTask, id=task_id)
-    return render(request, 'execution.html', {'task': task})
+    # Grab the selected format, default to plaintext if it doesn't exist
+    selected_format = task.config_data.get('format', 'Plaintext')
+    
+    context = {
+        'task': task,
+        'output_format': selected_format
+    }
+    return render(request, 'execution.html', context)
 
 def get_task_logs_api(request, task_id):
     """Live Telemetry Log Stream Feed Polling Endpoint"""

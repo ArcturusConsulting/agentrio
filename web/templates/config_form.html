@@ -16,37 +16,61 @@
 
     <div class="card">
         <h2 class="card-title">1. Execution Inputs</h2>
+        
         {% if mode == 'ACLGENERATOR' %}
             <div class="form-group">
                 <label for="raw_csv">Upload Physical Source Data (.csv)</label>
                 <input type="file" name="raw_csv" id="raw_csv" required accept=".csv">
             </div>
-                        <div class="form-group">
+            
+            <div class="form-group">
                 <label for="target_schema_csv">Upload Target Database Schema Layout (.csv)</label>
                 <input type="file" name="target_schema_csv" id="target_schema_csv" required accept=".csv">
             </div>
-
         {% else %}
-
-            <div class="form-group">
-                <label for="topic_brief">Topic brief / keywords for the article:</label>
-                <textarea name="topic_brief" id="topic_brief" rows="3" placeholder="Enter topic configuration instructions, raw concepts, or content keywords...">{{ config.topic_brief }}</textarea>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="topic_brief" style="display: block; color: #00E5FF; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                    Topic brief / keywords for the article:
+                </label>
+                <textarea 
+                    name="topic_brief" 
+                    id="topic_brief" 
+                    rows="4" 
+                    placeholder="Enter topic configuration instructions, raw concepts, or content keywords..." 
+                    required
+                    style="width: 100%; 
+                           box-sizing: border-box;
+                           padding: 12px; 
+                           background: #0A0D1A; 
+                           border: 1px solid #1E2238; 
+                           color: #FFFFFF; 
+                           border-radius: 6px; 
+                           font-size: 14px; 
+                           line-height: 1.5;
+                           outline: none;
+                           resize: vertical;"
+                >{{ config.topic_brief }}</textarea>
             </div>
             
-            <input type="text" 
-            name="target_site_url" 
-            id="target_site_url" 
-            value="{{ config.target_site_url }}" 
-            placeholder="https://example.com/target-domain" 
-            spellcheck="false" 
-            style="width: 100%; 
-                   padding: 12px; 
-                   background: #0A0D1A; 
-                   border: 1px solid #1E2238; 
-                   color: #FFFFFF; 
-                   border-radius: 6px; 
-                   font-size: 14px; 
-                   outline: none;">
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="target_site_url" style="display: block; color: #94A3B8; font-size: 14px; margin-bottom: 8px;">Target Site URL:</label>
+                <input type="text" 
+                    name="target_site_url" 
+                    id="target_site_url" 
+                    value="{{ config.target_site_url }}" 
+                    placeholder="https://example.com/target-domain" 
+                    spellcheck="false"
+                    required
+                    style="width: 100%; 
+                           box-sizing: border-box;
+                           padding: 12px; 
+                           background: #0A0D1A; 
+                           border: 1px solid #1E2238; 
+                           color: #FFFFFF; 
+                           border-radius: 6px; 
+                           font-size: 14px; 
+                           outline: none;">
+            </div>
 
             <div class="form-group">
                 <label for="length">Article Length (Minutes):</label>
@@ -66,6 +90,16 @@
                     <option value="Optimistic">Optimistic (Uplifting/Hopeful)</option>
                 </select>
             </div>
+
+            <div class="form-group">
+                <label for="format">Output Structure/Format:</label>
+                <select name="format" id="format" class="form-input">
+                    <option value="Plaintext">Plaintext Block (.txt)</option>
+                    <option value="Markdown">Standard Markdown (.md)</option>
+                    <option value="HTML">Raw HTML Fragment (.html)</option>
+                    <option value="JSON">Structured Article Schema (.json)</option>
+                </select>
+            </div>
         {% endif %}
     </div>
 
@@ -76,7 +110,7 @@
     </div>
 
     <div class="card">
-        <h2 class="card-title">3. Advanced Agent Routing (LLM Matrix)</h2>
+        <h2 class="card-title">3. Advanced Agent Routing (Gemini 2.5 Flash is recommended for all three)</h2>
         
         <div class="form-group">
             <label for="model_agent_1">Agent 1 Model Engine Mapping</label>

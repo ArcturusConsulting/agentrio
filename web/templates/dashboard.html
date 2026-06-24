@@ -13,17 +13,22 @@
     <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
         <thead>
             <tr style="background-color: #16192E; color: #00E5FF; font-size: 12px; text-transform: uppercase;">
-                <th style="padding: 14px;">Task ID</th>
+                <th style="padding: 14px; width: 40px;"></th> <th>Task ID</th>
                 <th>Engine Mode</th>
                 <th>Workflow Status</th>
                 <th>Timestamp</th>
-                <th style="text-align: right;">Actions</th>
+                <th style="text-align: right; padding-right: 14px;">Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for task in tasks %}
             <tr style="border-bottom: 1px solid #1E2238;">
-                <td style="padding: 14px;"><strong>#{{ task.id }}</strong></td>
+                <td style="padding: 14px; text-align: center;">
+                    <button type="button" onclick="toggleLogPanel('logs-{{ task.id }}', this)" style="background: none; border: none; color: #00E5FF; cursor: pointer; font-size: 14px; padding: 0; outline: none; transition: transform 0.2s;">
+                        ▶
+                    </button>
+                </td>
+                <td><strong>#{{ task.id }}</strong></td>
                 <td><code style="color: #FF7D00;">{{ task.mode }}</code></td>
                 <td>
                     <span style="font-family: monospace; background: #16192E; padding: 4px 8px; border-radius:4px;">
@@ -31,7 +36,7 @@
                     </span>
                 </td>
                 <td>{{ task.created_at|date:"Y-m-d H:i:s" }}</td>
-                <td style="text-align: right;">
+                <td style="text-align: right; padding-right: 14px;">
                     <a href="{% url 'config_form' %}?mode={{ task.mode }}&load_task_id={{ task.id }}"
                         style="color: #00E5FF; text-decoration: none; margin-right: 15px; font-weight: 600;">
                         Reuse Config
@@ -50,12 +55,36 @@
                     </form>
                 </td>
             </tr>
+
+            <tr id="logs-{{ task.id }}" style="display: none; background: #0A0D1A;">
+                <td colspan="6" style="padding: 15px 20px; border-bottom: 1px solid #1E2238;">
+                    <div style="color: #00E5FF; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; font-weight: 700;">
+                        Saved Session Execution Output Stream Log:
+                    </div>
+                    <pre style="background: #05060B; color: #94A3B8; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap; margin: 0; border: 1px solid #16192E; max-height: 250px; overflow-y: auto;">{% if task.config_data.execution_logs %}{{ task.config_data.execution_logs }}{% else %}[SYSTEM INITIATED] Connecting to local SQLite runtime channel...
+No deep session logs saved inside this configuration package database row.{% endif %}</pre>
+                </td>
+            </tr>
             {% empty %}
             <tr>
-                <td colspan="5" style="text-align: center; color: #64748B; padding: 40px 0;">No past tasks found in SQLite state database.</td>
+                <td colspan="6" style="text-align: center; color: #64748B; padding: 40px 0;">No past tasks found in SQLite state database.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+<script>
+function toggleLogPanel(panelId, button) {
+    const panel = document.getElementById(panelId);
+    if (panel.style.display === "none") {
+        panel.style.display = "table-row";
+        button.style.transform = "rotate(90deg)";
+        button.style.display = "inline-block";
+    } else {
+        panel.style.display = "none";
+        button.style.transform = "rotate(0deg)";
+    }
+}
+</script>
 {% endblock %}

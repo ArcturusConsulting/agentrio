@@ -18,6 +18,7 @@ class AgentTask(models.Model):
     output_file_path = models.CharField(max_length=1024, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    execution_logs = models.TextField(default="")
 
     def __str__(self):
         return f"Task #{self.id} ({self.mode}) - {self.status}"

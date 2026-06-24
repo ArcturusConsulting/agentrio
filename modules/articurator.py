@@ -1,5 +1,6 @@
 # modules/articurator.py
 # from web.utils import get_token_safe_calendar_manifest
+import time
 from modules.gateway import call_llm
 
 def run_articurator_graph(config, logger_callback=None):
@@ -12,7 +13,8 @@ def run_articurator_graph(config, logger_callback=None):
     
     length = config.get('length', '3')  
     tone = config.get('tone', 'Formal')  
-    
+    output_format = config.get('format', 'Plaintext')
+
     live_research_data = config.get('live_research_data', '')
     target_site_context = config.get('target_site_context', 'No live site data collected.')    
     model_analisa = config.get('model_agent_1', 'gemini-2.5-flash')
@@ -127,12 +129,15 @@ def run_articurator_graph(config, logger_callback=None):
         f"2. The final text MUST be approximately {length} minute(s) of total reading time (roughly 200-250 words per minute).\n"
         f"3. Enforce a strict {tone.lower()} tone seamlessly throughout the piece.\n"
         f"4. Apply crisp structural layout polish, and make sure that the story naturally integrates client URL: {target_site_url}.\n\n"
-        f"Return the polished, trimmed, and source-verified article containing a title, subtitle, and section titles as pure Markdown."
+        f"Return the polished, trimmed, and source-verified article containing a title, subtitle, and section titles as {output_format}."
+        f"If the selected format is Plaintext, write headings using normal CAPITAL LETTERS. If the format is Markdown or HTML, use their respective syntax markers.\n"
         f"Append a list of sources referred in the text at the bottom of the article, with the publisher names and the material titles (e.g., 'Sources - XXXX: xxxx xxxx xxxx, "
-        f"YYYY: yyyy yyyy yyyy, ZZZZ: zzzz zzzz zzzz'), but avoid including material titles in the body text for the sake of readability. "
+        f"YYYY: yyyy yyyy yyyy, ZZZZ: zzzz zzzz zzzz') with a line break after each, but avoid including material titles in the body text for the sake of readability. "
     )
     final_markdown_artifact = call_llm(model_checky, instruction_checky, checky_prompt)
     
     emit_log(f"[CHECKY] Thank you for your patience, it's done! The finished article is below.")
+
+    time.sleep(1.0)
 
     return final_markdown_artifact
